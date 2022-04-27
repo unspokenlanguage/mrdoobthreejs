@@ -32,6 +32,7 @@
 			import { FBXLoader } from './jsm/loaders/FBXLoader.js';
 			import { GLTFLoader } from './jsm/loaders/GLTFLoader.js';
 			import { RGBELoader } from './jsm/loaders/RGBELoader.js';
+			import { OrbitControls } from './jsm/controls/OrbitControls.js';
 
 			let container;
 			let camera, scene, renderer;
@@ -78,6 +79,64 @@
 				dirLight.shadow.camera.right = 120;
 				scene.add( dirLight );
 
+				const fbxLoader3 = new FBXLoader()
+					fbxLoader3.load(
+						'models/fbx/nurbs.fbx',
+						(object) => {
+							// object.traverse(function (child) {
+							//     if ((child as THREE.Mesh).isMesh) {
+							//         // (child as THREE.Mesh).material = material
+							//         if ((child as THREE.Mesh).material) {
+							//             ((child as THREE.Mesh).material as THREE.MeshBasicMaterial).transparent = false
+							//         }
+							//     }
+							// })
+							object.scale.set(.01, .01, .01)
+							scene.add(object)
+						},
+						(xhr) => {
+							console.log((xhr.loaded / xhr.total) * 100 + '% loaded')
+						},
+						(error) => {
+							console.log(error)
+						}
+					)
+
+
+				const loader = new FBXLoader();
+				
+
+				loader.load( 'models/fbx/Samba Dancing.fbx', function ( object ) {
+					object.scale.set(.002, .002, .002)
+
+					
+
+					// object.position.x = 0;
+					// object.position.y = 0;
+					// object.position.z = -10;
+
+					mixer = new THREE.AnimationMixer( object );
+					 
+					
+					const action = mixer.clipAction( object.animations[ 0 ] );
+					action.play();
+
+					object.traverse( function ( child ) {
+
+						if ( child.isMesh ) {
+
+							child.castShadow = true;
+							child.receiveShadow = true;
+
+						}
+
+					} );
+					
+					scene.add( object );
+
+				} );
+
+
 				new RGBELoader()
 					.setPath( 'textures/equirectangular/' )
 					.load( 'royal_esplanade_1k.hdr', function ( texture ) {
@@ -111,7 +170,9 @@
 				renderer.setSize( window.innerWidth, window.innerHeight );
 				renderer.xr.enabled = true;
 				container.appendChild( renderer.domElement );
-
+				const controls = new OrbitControls(camera, renderer.domElement)
+				controls.enableDamping = true
+				controls.target.set(0, 1, 0)
 				//
 
 				document.body.appendChild( ARButton.createButton( renderer, { requiredFeatures: [ 'hit-test' ] } ) );
