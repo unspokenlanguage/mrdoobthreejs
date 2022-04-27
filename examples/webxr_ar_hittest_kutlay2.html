@@ -56,7 +56,7 @@
 				scene = new THREE.Scene();
 
 				camera = new THREE.PerspectiveCamera( 70, window.innerWidth / window.innerHeight, 0.01, 20 );
-				camera.position.set(0,10,10)
+				//camera.position.set(0,10,10)
 
 				//scene.add(camera);
 
@@ -94,9 +94,9 @@
 						const loader = new GLTFLoader().setPath( 'models/gltf/DamagedHelmet/glTF/' );
 						loader.load( 'DamagedHelmet.gltf', function ( gltf ) {
 							//THREE.Box3.setFromObject(gltf.scene)
-							// const mesh = new THREE.Mesh( geometry, material );
-							// reticle.matrix.decompose( gltf.position, gltf.quaternion, gltf.scale );
-							// reticle.matrix.decompose( gltf.position, gltf.quaternion, gltf.scale );
+							gltf.scene.position.set( 0, - 0.2, - 2 ).applyMatrix4( controller.matrixWorld );
+							//mesh.quaternion.setFromRotationMatrix( controller.matrixWorld );
+
 							scene.add( gltf.scene );
 
 							render();
@@ -127,7 +127,7 @@
 						const material = new THREE.MeshPhongMaterial( { color: 0xffffff * Math.random() } );
 						const mesh = new THREE.Mesh( geometry, material );
 						reticle.matrix.decompose( mesh.position, mesh.quaternion, mesh.scale );
-						reticle.matrix.decompose( mesh.position, mesh.quaternion, mesh.scale );
+						
 						mesh.scale.y = Math.random() * 2 + 1;
 						scene.add( mesh );
 
