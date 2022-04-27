@@ -56,8 +56,9 @@
 
 						texture.mapping = THREE.EquirectangularReflectionMapping;
 
-						scene.background = texture;
+						//scene.background = cubeGenerator.renderTarget;
 						scene.environment = texture;
+						
 
 						render();
 

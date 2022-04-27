@@ -43,12 +43,11 @@
 			let hitTestSourceRequested = false;
 			let mixer;
 			const clock = new THREE.Clock();
+
 			init();
 			animate();
 
 			function init() {
-
-			    
 				document.body.appendChild(stats.dom)
 
 				container = document.createElement( 'div' );
@@ -56,11 +55,11 @@
 
 				scene = new THREE.Scene();
 
-
-
 				camera = new THREE.PerspectiveCamera( 70, window.innerWidth / window.innerHeight, 0.01, 20 );
 				camera.position.set(0,10,10)
-				scene.add(camera);
+
+				//scene.add(camera);
+
 				const light = new THREE.HemisphereLight( 0xffffff, 0xbbbbff, 1 );
 				light.position.set( 0.5, 1, 0.25 );
 				scene.add( light );
@@ -79,63 +78,33 @@
 				dirLight.shadow.camera.right = 120;
 				scene.add( dirLight );
 
-				const loader = new FBXLoader();
-				// loader.load( 'models/fbx/Samba Dancing.fbx', function ( object ) {
-				// 	const scaleFactor = 1;
+				new RGBELoader()
+					.setPath( 'textures/equirectangular/' )
+					.load( 'royal_esplanade_1k.hdr', function ( texture ) {
 
-				// 	object.scale.multiplyScalar(scaleFactor); 
-					
+						texture.mapping = THREE.EquirectangularReflectionMapping;
 
-				// 	// object.position.x = 0;
-				// 	// object.position.y = 0;
-				// 	// object.position.z = -10;
+						//scene.background = texture;
+						scene.environment = texture;
 
-				// 	mixer = new THREE.AnimationMixer( object );
-					 
-					
-				// 	const action = mixer.clipAction( object.animations[ 0 ] );
-				// 	action.play();
+						render();
 
-				// 	object.traverse( function ( child ) {
+						// model
 
-				// 		if ( child.isMesh ) {
+						const loader = new GLTFLoader().setPath( 'models/gltf/DamagedHelmet/glTF/' );
+						loader.load( 'DamagedHelmet.gltf', function ( gltf ) {
+							//THREE.Box3.setFromObject(gltf.scene)
+							// const mesh = new THREE.Mesh( geometry, material );
+							// reticle.matrix.decompose( gltf.position, gltf.quaternion, gltf.scale );
+							// reticle.matrix.decompose( gltf.position, gltf.quaternion, gltf.scale );
+							scene.add( gltf.scene );
 
-				// 			child.castShadow = true;
-				// 			child.receiveShadow = true;
+							render();
 
-				// 		}
+						} );
 
-				// 	} );
-					
-				// 	scene.add( object );
-
-				// } );
-
-
-				// new RGBELoader()
-				// 	.setPath( 'textures/equirectangular/' )
-				// 	.load( 'royal_esplanade_1k.hdr', function ( texture ) {
-
-				// 		texture.mapping = THREE.EquirectangularReflectionMapping;
-
-				// 		//scene.background = texture;
-				// 		scene.environment = texture;
-
-				// 		render();
-
-				// 		// model
-
-				// 		const loader = new GLTFLoader().setPath( 'models/gltf/DamagedHelmet/glTF/' );
-				// 		loader.load( 'DamagedHelmet.gltf', function ( gltf ) {
-				// 			//THREE.Box3.setFromObject(gltf.scene)
-				// 			scene.add( gltf.scene );
-
-				// 			render();
-
-				// 		} );
-
-				// 	} );
-
+					} );
+				
 
 				renderer = new THREE.WebGLRenderer( { antialias: true, alpha: true } );
 				renderer.setPixelRatio( window.devicePixelRatio );
@@ -157,6 +126,7 @@
 
 						const material = new THREE.MeshPhongMaterial( { color: 0xffffff * Math.random() } );
 						const mesh = new THREE.Mesh( geometry, material );
+						reticle.matrix.decompose( mesh.position, mesh.quaternion, mesh.scale );
 						reticle.matrix.decompose( mesh.position, mesh.quaternion, mesh.scale );
 						mesh.scale.y = Math.random() * 2 + 1;
 						scene.add( mesh );
@@ -184,6 +154,7 @@
 			}
 
 			function onWindowResize() {
+
 				camera.aspect = window.innerWidth / window.innerHeight;
 				camera.updateProjectionMatrix();
 
@@ -194,7 +165,6 @@
 			//
 
 			function animate() {
-
 				requestAnimationFrame( animate );
 
 				const delta = clock.getDelta();
@@ -204,6 +174,7 @@
 				renderer.render( scene, camera );
 
 				stats.update();
+				renderer.setAnimationLoop( render );
 
 			}
 
@@ -230,11 +201,6 @@
 
 							hitTestSourceRequested = false;
 							hitTestSource = null;
-							if (session.isImmersive) {
-							// When in 'immersive-ar' mode don't draw an opaque background because
-							// we want the real world to show through.
-							skybox.visible = false;
-							}
 
 						} );
 
@@ -247,12 +213,11 @@
 						const hitTestResults = frame.getHitTestResults( hitTestSource );
 
 						if ( hitTestResults.length ) {
-
 							const hit = hitTestResults[ 0 ];
 							console.log('hitTestResults.length -> ' + hitTestResults.length + 'hit -> ' + hit)
+
 							reticle.visible = true;
 							reticle.matrix.fromArray( hit.getPose( referenceSpace ).transform.matrix );
-							//console.log('reticle matrix -> ' + reticle.matrix.po);
 
 						} else {
 
