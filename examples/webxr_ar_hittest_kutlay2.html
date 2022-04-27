@@ -79,62 +79,62 @@
 				dirLight.shadow.camera.right = 120;
 				scene.add( dirLight );
 
-				const fbxLoader3 = new FBXLoader()
-					fbxLoader3.load(
-						'models/fbx/nurbs.fbx',
-						(object) => {
-							// object.traverse(function (child) {
-							//     if ((child as THREE.Mesh).isMesh) {
-							//         // (child as THREE.Mesh).material = material
-							//         if ((child as THREE.Mesh).material) {
-							//             ((child as THREE.Mesh).material as THREE.MeshBasicMaterial).transparent = false
-							//         }
-							//     }
-							// })
-							object.scale.set(.01, .01, .01)
-							scene.add(object)
-						},
-						(xhr) => {
-							console.log((xhr.loaded / xhr.total) * 100 + '% loaded')
-						},
-						(error) => {
-							console.log(error)
-						}
-					)
+				// const fbxLoader3 = new FBXLoader()
+				// 	fbxLoader3.load(
+				// 		'models/fbx/nurbs.fbx',
+				// 		(object) => {
+				// 			// object.traverse(function (child) {
+				// 			//     if ((child as THREE.Mesh).isMesh) {
+				// 			//         // (child as THREE.Mesh).material = material
+				// 			//         if ((child as THREE.Mesh).material) {
+				// 			//             ((child as THREE.Mesh).material as THREE.MeshBasicMaterial).transparent = false
+				// 			//         }
+				// 			//     }
+				// 			// })
+				// 			object.scale.set(.01, .01, .01)
+				// 			scene.add(object)
+				// 		},
+				// 		(xhr) => {
+				// 			console.log((xhr.loaded / xhr.total) * 100 + '% loaded')
+				// 		},
+				// 		(error) => {
+				// 			console.log(error)
+				// 		}
+				// 	)
 
 
-				const loader = new FBXLoader();
+				// const loader = new FBXLoader();
 				
 
-				loader.load( 'models/fbx/Samba Dancing.fbx', function ( object ) {
-					object.scale.set(.002, .002, .002)
+				// loader.load( 'models/fbx/Samba Dancing.fbx', function ( object ) {
+				// 	object.scale.set(.002, .002, .002)
 
 					
 
-					// object.position.x = 0;
-					// object.position.y = 0;
-					// object.position.z = -10;
+				// 	// object.position.x = 0;
+				// 	// object.position.y = 0;
+				// 	// object.position.z = -10;
 
-					mixer = new THREE.AnimationMixer( object );
+				// 	mixer = new THREE.AnimationMixer( object );
 					 
 					
-					const action = mixer.clipAction( object.animations[ 0 ] );
-					action.play();
+				// 	const action = mixer.clipAction( object.animations[ 0 ] );
+				// 	action.play();
 
-					object.traverse( function ( child ) {
+				// 	object.traverse( function ( child ) {
 
-						if ( child.isMesh ) {
+				// 		if ( child.isMesh ) {
 
-							child.castShadow = true;
-							child.receiveShadow = true;
+				// 			child.castShadow = true;
+				// 			child.receiveShadow = true;
 
-						}
+				// 		}
 
-					} );
+				// 	} );
 					
-					scene.add( object );
+				// 	scene.add( object );
 
-				} );
+				// } );
 
 
 				new RGBELoader()
@@ -153,6 +153,7 @@
 						const loader = new GLTFLoader().setPath( 'models/gltf/DamagedHelmet/glTF/' );
 						loader.load( 'DamagedHelmet.gltf', function ( gltf ) {
 							//THREE.Box3.setFromObject(gltf.scene)
+							gltf.scene.scale.multiplyScalar(0.5);
 							gltf.scene.position.set( 0, - 0.2, - 2 ).applyMatrix4( controller.matrixWorld );
 							//mesh.quaternion.setFromRotationMatrix( controller.matrixWorld );
 
