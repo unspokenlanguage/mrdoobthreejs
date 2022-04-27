@@ -30,6 +30,7 @@
 			import Stats from './jsm/libs/stats.module.js'
 			import { ARButton } from './jsm/webxr/ARButton.js';
 			import { FBXLoader } from './jsm/loaders/FBXLoader.js';
+			import { GLTFLoader } from './jsm/loaders/GLTFLoader.js';
 
 			let container;
 			let camera, scene, renderer;
@@ -39,6 +40,7 @@
 
 			let hitTestSource = null;
 			let hitTestSourceRequested = false;
+			let mixer;
 
 			init();
 			animate();
@@ -52,9 +54,13 @@
 				document.body.appendChild( container );
 
 				scene = new THREE.Scene();
-				scene.fog = new THREE.Fog( 0xa0a0a0, 200, 1000 );
-				
+
 				camera = new THREE.PerspectiveCamera( 70, window.innerWidth / window.innerHeight, 0.01, 20 );
+
+				const light = new THREE.HemisphereLight( 0xffffff, 0xbbbbff, 1 );
+				light.position.set( 0.5, 1, 0.25 );
+				scene.add( light );
+
 
 				const hemiLight = new THREE.HemisphereLight( 0xffffff, 0x444444 );
 				hemiLight.position.set( 0, 200, 0 );
@@ -69,8 +75,32 @@
 				dirLight.shadow.camera.right = 120;
 				scene.add( dirLight );
 
+				const loader = new FBXLoader();
+				loader.load( 'models/fbx/Samba Dancing.fbx', function ( object ) {
+					const scaleFactor = 10;
 
-				//
+					object.scale.multiplyScalar(scaleFactor); 
+
+					mixer = new THREE.AnimationMixer( object );
+					 
+					
+					const action = mixer.clipAction( object.animations[ 0 ] );
+					action.play();
+
+					object.traverse( function ( child ) {
+
+						if ( child.isMesh ) {
+
+							child.castShadow = true;
+							child.receiveShadow = true;
+
+						}
+
+					} );
+					
+					scene.add( object );
+
+				} );
 
 				renderer = new THREE.WebGLRenderer( { antialias: true, alpha: true } );
 				renderer.setPixelRatio( window.devicePixelRatio );
@@ -93,7 +123,6 @@
 						const material = new THREE.MeshPhongMaterial( { color: 0xffffff * Math.random() } );
 						const mesh = new THREE.Mesh( geometry, material );
 						reticle.matrix.decompose( mesh.position, mesh.quaternion, mesh.scale );
-						console.log('reticle mesh.position' + mesh.position)
 						mesh.scale.y = Math.random() * 2 + 1;
 						scene.add( mesh );
 
@@ -176,7 +205,7 @@
 							console.log('hitTestResults.length -> ' + hitTestResults.length + 'hit -> ' + hit)
 							reticle.visible = true;
 							reticle.matrix.fromArray( hit.getPose( referenceSpace ).transform.matrix );
-							
+							//console.log('reticle matrix -> ' + reticle.matrix.po);
 
 						} else {
 

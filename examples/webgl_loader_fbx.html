@@ -84,9 +84,11 @@
 				// model
 				const loader = new FBXLoader();
 				loader.load( 'models/fbx/Samba Dancing.fbx', function ( object ) {
+					object.scale.multiplyScalar(0.1); 
 
 					mixer = new THREE.AnimationMixer( object );
-
+					 
+					
 					const action = mixer.clipAction( object.animations[ 0 ] );
 					action.play();
 
@@ -100,7 +102,7 @@
 						}
 
 					} );
-
+					
 					scene.add( object );
 
 				} );
