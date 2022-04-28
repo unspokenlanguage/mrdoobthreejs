@@ -278,7 +278,7 @@
 							GlbObject.position.set( 0, - 0.2, - 10 ).applyMatrix4( controller.matrixWorld );
 							//mesh.quaternion.setFromRotationMatrix( controller.matrixWorld );
 							
-							cubes77.push(GlbObject)
+							cubes77.push(gltf.scene)
 							
 							scene.add( GlbObject );
 
@@ -390,18 +390,23 @@
 					]
 
 				
-					//cubes.push()
-					// cubes77[0].position.x = -1
-					// cubes77[1].position.x = 1
-					// cubes77[2].position.x = 2
+					const cubes77 = [
+						new THREE.Mesh(geometry, material77[0]),
+						new THREE.Mesh(geometry, material77[1]),
+						new THREE.Mesh(geometry, material77[2])
+					]
+					cubes77[0].position.x = -1
+					cubes77[1].position.x = 1
+					cubes77[2].position.x = 2
 
-					// cubes77[0].position.z = -7
-					// cubes77[1].position.z = -8
-					// cubes77[2].position.z = -6
-					// cubes77.forEach((c) => scene.add(c))
+					cubes77[0].position.z = -7
+					cubes77[1].position.z = -8
+					cubes77[2].position.z = -6
+					cubes77.forEach((c) => scene.add(c))
 
 					const controls2 = new DragControls(cubes77, camera, renderer.domElement)
-
+					console.log(cubes77)
+					//cubes77[0].scale.multiplyScalar(1);
 					// add event listener to highlight dragged objects
 
 					controls2.addEventListener( 'dragstart', function ( event ) {
@@ -412,7 +417,7 @@
 
 					controls2.addEventListener( 'dragend', function ( event ) {
 
-						event.object.material.emissive.set( 0x000000 );
+						event.object.material.wireframe = false;
 
 					} );
 
