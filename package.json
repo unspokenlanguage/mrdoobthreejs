@@ -168,6 +168,7 @@
     "directories": {}
   },
   "dependencies": {
+    "@tweenjs/tween.js": "^18.6.4",
     "three": "^0.139.2",
     "troika-three-text": "^0.46.4"
   }
