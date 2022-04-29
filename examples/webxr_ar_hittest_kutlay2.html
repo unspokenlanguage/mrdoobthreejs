@@ -36,7 +36,7 @@
 			import { GLTFLoader } from './jsm/loaders/GLTFLoader.js';
 			import { RGBELoader } from './jsm/loaders/RGBELoader.js';
 			import { OrbitControls } from './jsm/controls/OrbitControls.js';
-			import { DragControls } from './jsm/controls/DragControls.js';
+			//import { DragControls } from './jsm/controls/DragControls.js';
 			let container;
 			let camera, scene, renderer;
 			let controller;
@@ -84,119 +84,86 @@
 				dirLight.shadow.camera.right = 120;
 				scene.add( dirLight );
 
-				var cover = new THREE.MeshNormalMaterial();
-				var sphereShape = new THREE.SphereGeometry(100, 20, 15);
-			
-				var sphereMesh = new THREE.Mesh(sphereShape, cover);
-				sphereMesh.position.set( 0, - 0.2, - 10 )
-				scene.add(sphereMesh);
 
-				var clock = new THREE.Clock();
+				// const loader2 = new FontLoader();
+				// loader2.load( 'fonts/helvetiker_regular.typeface.json', function ( font ) {
 
-				var buildUp = function () {
-					return new TWEEN.Tween({
-						scale: 1
-					}).to ({
-						scale : 3
-					}, 2000).onUpdate(function () {
-								sphereMesh.scale.x = this.scale;
-							}).onComplete(function () {
-								buildDown().start();
-							});
-				};
-				var buildDown = function () {
-					return new TWEEN.Tween({
-						scale: 3
-					}).to ({
-						scale : 1
-					}, 2000).onUpdate(function () {
-								sphereMesh.scale.x = this.scale;
-							}).onComplete(function () {
-								buildUp().start();
-							});
-				};
+				// 	const color = 0xffffff;
 
-				buildUp().start();
+				// 	const matDark = new THREE.LineBasicMaterial( {
+				// 		color: color,
+				// 		side: THREE.DoubleSide
+				// 	} );
 
-				const loader2 = new FontLoader();
-				loader2.load( 'fonts/helvetiker_regular.typeface.json', function ( font ) {
+				// 	const matLite = new THREE.MeshBasicMaterial( {
+				// 		color: color,
+				// 		transparent: true,
+				// 		opacity: 1,
+				// 		side: THREE.DoubleSide
+				// 	} );
 
-					const color = 0xffffff;
+				// 	const message = 'Three.js\nSimple text.';
 
-					const matDark = new THREE.LineBasicMaterial( {
-						color: color,
-						side: THREE.DoubleSide
-					} );
+				// 	const shapes = font.generateShapes( message, 0.1 );
 
-					const matLite = new THREE.MeshBasicMaterial( {
-						color: color,
-						transparent: true,
-						opacity: 1,
-						side: THREE.DoubleSide
-					} );
+				// 	const geometry = new THREE.ShapeGeometry( shapes );
 
-					const message = 'Three.js\nSimple text.';
+				// 	geometry.computeBoundingBox();
 
-					const shapes = font.generateShapes( message, 0.1 );
+				// 	const xMid = - 0.5 * ( geometry.boundingBox.max.x - geometry.boundingBox.min.x );
 
-					const geometry = new THREE.ShapeGeometry( shapes );
+				// 	geometry.translate( xMid, 0, 0 );
 
-					geometry.computeBoundingBox();
+				// 	// make shape ( N.B. edge view not visible )
 
-					const xMid = - 0.5 * ( geometry.boundingBox.max.x - geometry.boundingBox.min.x );
+				// 	const text = new THREE.Mesh( geometry, matLite );
+				// 	text.position.z = -6;
+				// 	scene.add( text );
 
-					geometry.translate( xMid, 0, 0 );
+				// 	// make line shape ( N.B. edge view remains visible )
 
-					// make shape ( N.B. edge view not visible )
+				// 	const holeShapes = [];
 
-					const text = new THREE.Mesh( geometry, matLite );
-					text.position.z = -6;
-					scene.add( text );
+				// 	for ( let i = 0; i < shapes.length; i ++ ) {
 
-					// make line shape ( N.B. edge view remains visible )
+				// 		const shape = shapes[ i ];
 
-					const holeShapes = [];
+				// 		if ( shape.holes && shape.holes.length > 0 ) {
 
-					for ( let i = 0; i < shapes.length; i ++ ) {
+				// 			for ( let j = 0; j < shape.holes.length; j ++ ) {
 
-						const shape = shapes[ i ];
+				// 				const hole = shape.holes[ j ];
+				// 				holeShapes.push( hole );
 
-						if ( shape.holes && shape.holes.length > 0 ) {
+				// 			}
 
-							for ( let j = 0; j < shape.holes.length; j ++ ) {
+				// 		}
 
-								const hole = shape.holes[ j ];
-								holeShapes.push( hole );
+				// 	}
 
-							}
+				// 	shapes.push.apply( shapes, holeShapes );
 
-						}
+				// 	const lineText = new THREE.Object3D();
 
-					}
+				// 	for ( let i = 0; i < shapes.length; i ++ ) {
 
-					shapes.push.apply( shapes, holeShapes );
+				// 		const shape = shapes[ i ];
 
-					const lineText = new THREE.Object3D();
+				// 		const points = shape.getPoints();
+				// 		const geometry = new THREE.BufferGeometry().setFromPoints( points );
 
-					for ( let i = 0; i < shapes.length; i ++ ) {
+				// 		geometry.translate( xMid, 0, 0 );
 
-						const shape = shapes[ i ];
+				// 		const lineMesh = new THREE.Line( geometry, matDark );
+				// 		lineText.add( lineMesh );
 
-						const points = shape.getPoints();
-						const geometry = new THREE.BufferGeometry().setFromPoints( points );
+				// 	}
 
-						geometry.translate( xMid, 0, 0 );
+				// 	scene.add( lineText );
 
-						const lineMesh = new THREE.Line( geometry, matDark );
-						lineText.add( lineMesh );
+				// 	render();
 
-					}
-
-					scene.add( lineText );
-
-					render();
-
-				} ); //end load function
+				// } ); //end load function
 
 				
 				// const fbxLoader3 = new FBXLoader()
@@ -270,17 +237,18 @@
 
 						// model
 
-						const loader = new GLTFLoader().setPath( 'models/gltf/DamagedHelmet/glTF/' );
-						loader.load( 'DamagedHelmet.gltf', function ( gltf ) {
+						const loader = new GLTFLoader().setPath( 'models/gltf/Lantern/glTF/' );
+						loader.load( 'Lantern.gltf', function ( gltf ) {
 							GlbObject = gltf.scene;
 							//THREE.Box3.setFromObject(gltf.scene)
-							GlbObject.scale.multiplyScalar(0.5);
-							GlbObject.position.set( 0, - 0.2, - 10 ).applyMatrix4( controller.matrixWorld );
-							//mesh.quaternion.setFromRotationMatrix( controller.matrixWorld );
-							
+							GlbObject.scale.multiplyScalar(.3);
+							GlbObject.position.set( 0, -5, - 10 ).applyMatrix4( controller.matrixWorld );
+							GlbObject.rotation.set(0, -45, 0) 
+							//mesh.quaternion.setFromRotationMatrix(; controller.matrixWorld );
+							console.log(gltf.scene.children)
 							cubes77.push(gltf.scene)
-							
-							scene.add( GlbObject );
+							console.log(GlbObject)
+							scene.add( gltf.scene );
 
 							render();
 
@@ -290,34 +258,34 @@
 					
 				//document.body.appendChild( renderer.domElement );
 
-				// box
-				function createBox() {
-					let box = new THREE.Mesh(new THREE.BoxBufferGeometry(),
-						new THREE.MeshPhongMaterial({ color: 0xDC143C }));
-					box.position.set(0, 2, -5)
-					box.scale.set(.03, .03, .03);
-					box.castShadow = true;
-					box.receiveShadow = true;
-					scene.add(box)
+				// // box
+				// function createBox() {
+				// 	let box = new THREE.Mesh(new THREE.BoxBufferGeometry(),
+				// 		new THREE.MeshPhongMaterial({ color: 0xDC143C }));
+				// 	box.position.set(0, 2, -5)
+				// 	box.scale.set(.03, .03, .03);
+				// 	box.castShadow = true;
+				// 	box.receiveShadow = true;
+				// 	scene.add(box)
 
-					var start = { x: 0.5, y: 0.5, z: 0.5 };
-					var target1 = { x: 1, y: 1, z: 1 };
-					var target2 = { x: 0.4, y: 0.4, z: 0.4 };
-					var tween1 = new TWEEN.Tween(start).to(target1, 2000).easing(TWEEN.Easing.Elastic.InOut)
-					var tween2 = new TWEEN.Tween(start).to(target2, 2000).easing(TWEEN.Easing.Elastic.InOut).chain(tween1)
-					tween1.chain(tween2)
-					tween1.start()
+				// 	var start = { x: 0.5, y: 0.5, z: 0.5 };
+				// 	var target1 = { x: 1, y: 1, z: 1 };
+				// 	var target2 = { x: 0.4, y: 0.4, z: 0.4 };
+				// 	var tween1 = new TWEEN.Tween(start).to(target1, 2000).easing(TWEEN.Easing.Elastic.InOut)
+				// 	var tween2 = new TWEEN.Tween(start).to(target2, 2000).easing(TWEEN.Easing.Elastic.InOut).chain(tween1)
+				// 	tween1.chain(tween2)
+				// 	tween1.start()
 
-					const update = function () {
-						box.scale.x = start.x;
-						box.scale.y = start.y;
-						box.scale.z = start.z;
-					}
+				// 	const update = function () {
+				// 		box.scale.x = start.x;
+				// 		box.scale.y = start.y;
+				// 		box.scale.z = start.z;
+				// 	}
 
-					tween1.onUpdate(update)
-					tween2.onUpdate(update);
-				}
-				createBox() 
+				// 	tween1.onUpdate(update)
+				// 	tween2.onUpdate(update);
+				// }
+				// createBox() 
 				renderer = new THREE.WebGLRenderer( { antialias: true } );
 				renderer.setSize( window.innerWidth, window.innerHeight );
 				document.body.appendChild( renderer.domElement );
@@ -341,7 +309,7 @@
 
 				//
 
-				const geometry = new THREE.CylinderGeometry( 0.1, 0.1, 0.2, 32 ).translate( 0, 0.1, 0 );
+				//const geometry = new THREE.CylinderGeometry( 0.1, 0.1, 0.2, 32 ).translate( 0, 0.1, 0 );
 
 				function onSelect() {
 
@@ -358,10 +326,10 @@
 
 				}
 
-				const geometry33 = new THREE.CylinderGeometry( 0.1, 0.1, 0.2, 32 ).translate( 0, 0.1, 0 );
-				const material33 = new THREE.MeshPhongMaterial( { color: 0xffffff * Math.random() } );
-				const mesh33= new THREE.Mesh( geometry, material33 )
-				scene.add(mesh33)
+				// const geometry33 = new THREE.CylinderGeometry( 0.1, 0.1, 0.2, 32 ).translate( 0, 0.1, 0 );
+				// const material33 = new THREE.MeshPhongMaterial( { color: 0xffffff * Math.random() } );
+				// const mesh33= new THREE.Mesh( geometry, material33 )
+				// scene.add(mesh33)
 
 				controller = renderer.xr.getController( 0 );
 				controller.addEventListener( 'select', onSelect );
@@ -378,48 +346,48 @@
 				//
 
 
-				const geometry77 = new THREE.BoxGeometry()
-					//const material: THREE.MeshPhongMaterial = new THREE.MeshPhongMaterial({ color: 0xff0000, transparent: true })
-					//const cube: THREE.Mesh = new THREE.Mesh(geometry, material)
-					//scene.add(cube)
+				// const geometry77 = new THREE.BoxGeometry()
+				// 	//const material: THREE.MeshPhongMaterial = new THREE.MeshPhongMaterial({ color: 0xff0000, transparent: true })
+				// 	//const cube: THREE.Mesh = new THREE.Mesh(geometry, material)
+				// 	//scene.add(cube)
 
-					const material77 = [
-						new THREE.MeshPhongMaterial({ color: 0xff0000, transparent: true }),
-						new THREE.MeshPhongMaterial({ color: 0x00ff00, transparent: true }),
-						new THREE.MeshPhongMaterial({ color: 0x0000ff, transparent: true })
-					]
+				// 	const material77 = [
+				// 		new THREE.MeshPhongMaterial({ color: 0xff0000, transparent: true }),
+				// 		new THREE.MeshPhongMaterial({ color: 0x00ff00, transparent: true }),
+				// 		new THREE.MeshPhongMaterial({ color: 0x0000ff, transparent: true })
+				// 	]
 
 				
-					const cubes77 = [
-						new THREE.Mesh(geometry, material77[0]),
-						new THREE.Mesh(geometry, material77[1]),
-						new THREE.Mesh(geometry, material77[2])
-					]
-					cubes77[0].position.x = -1
-					cubes77[1].position.x = 1
-					cubes77[2].position.x = 2
+					// const cubes77 = [
+					// 	new THREE.Mesh(geometry, material77[0]),
+					// 	new THREE.Mesh(geometry, material77[1]),
+					// 	new THREE.Mesh(geometry, material77[2])
+					// ]
+					// cubes77[0].position.x = -1
+					// cubes77[1].position.x = 1
+					// cubes77[2].position.x = 2
 
-					cubes77[0].position.z = -7
-					cubes77[1].position.z = -8
-					cubes77[2].position.z = -6
-					cubes77.forEach((c) => scene.add(c))
+					// cubes77[0].position.z = -7
+					// cubes77[1].position.z = -8
+					// cubes77[2].position.z = -6
+					// cubes77.forEach((c) => scene.add(c))
 
-					const controls2 = new DragControls(cubes77, camera, renderer.domElement)
-					console.log(cubes77)
-					//cubes77[0].scale.multiplyScalar(1);
-					// add event listener to highlight dragged objects
+					// const controls2 = new DragControls(cubes77, camera, renderer.domElement)
+					
+					// //cubes77[0].scale.multiplyScalar(1);
+					// // add event listener to highlight dragged objects
 
-					controls2.addEventListener( 'dragstart', function ( event ) {
+					// controls2.addEventListener( 'dragstart', function ( event ) {
 
-						event.object.material.wireframe = true;
+					// 	event.object.scale.multiplyScalar(1);
 
-					} );
+					// } );
 
-					controls2.addEventListener( 'dragend', function ( event ) {
+					// controls2.addEventListener( 'dragend', function ( event ) {
 
-						event.object.material.wireframe = false;
+					// 	event.object.scale.multiplyScalar(0.5);
 
-					} );
+					// } );
 
 				window.addEventListener( 'resize', onWindowResize );
 
@@ -440,7 +408,7 @@
 				requestAnimationFrame( animate );
 
 				var t = clock.getElapsedTime();
-				TWEEN.update();
+				//TWEEN.update();
 
 
 				const delta = clock.getDelta();
