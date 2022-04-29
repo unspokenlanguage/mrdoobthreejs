@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>three.js ar - hit test</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+		<link type="text/css" rel="stylesheet" href="main.css">
+	</head>
+	<body>
+
+		<div id="info">
+			<a href="https://threejs.org" target="_blank" rel="noopener">three.js</a> ar - hit test<br/>(Chrome Android 81+)
+		</div>
+
+		<!-- Import maps polyfill -->
+		<!-- Remove this when import maps will be widely supported -->
+		<script src="http://gamingJS.com/Tween.js"></script>
+		<script async src="https://unpkg.com/es-module-shims@1.3.6/dist/es-module-shims.js"></script>
+
+		
+		<script type="importmap">
+			{
+				"imports": {
+					"three": "../build/three.module.js"
+				}
+			}
+		</script>
+
+		<script type="module">
+
+			import * as THREE from 'three';
+			import Stats from './jsm/libs/stats.module.js'
+			import { ARButton } from './jsm/webxr/ARButton.js';
+			import { FontLoader } from './jsm/loaders/FontLoader.js';
+			import { FBXLoader } from './jsm/loaders/FBXLoader.js';
+			import { GLTFLoader } from './jsm/loaders/GLTFLoader.js';
+			import { RGBELoader } from './jsm/loaders/RGBELoader.js';
+			import { OrbitControls } from './jsm/controls/OrbitControls.js';
+			import { DragControls } from './jsm/controls/DragControls.js';
+			let container;
+			let camera, scene, renderer;
+			let controller;
+			const stats = Stats()
+			let reticle;
+			const cubes77 = []
+
+			let GlbObject;
+			let hitTestSource = null;
+			let hitTestSourceRequested = false;
+			let mixer;
+			const clock = new THREE.Clock();
+
+			init();
+			animate();
+
+			function init() {
+				document.body.appendChild(stats.dom)
+
+				container = document.createElement( 'div' );
+				document.body.appendChild( container );
+
+				scene = new THREE.Scene();
+
+				camera = new THREE.PerspectiveCamera( 70, window.innerWidth / window.innerHeight, 0.01, 20 );
+				//camera.position.set(0,10,10)
+
+				//scene.add(camera);
+
+				const light = new THREE.HemisphereLight( 0xffffff, 0xbbbbff, 1 );
+				light.position.set( 0.5, 1, 0.25 );
+				scene.add( light );
+
+
+				const hemiLight = new THREE.HemisphereLight( 0xffffff, 0x444444 );
+				hemiLight.position.set( 0, 200, 0 );
+				scene.add( hemiLight );
+
+				const dirLight = new THREE.DirectionalLight( 0xffffff );
+				dirLight.position.set( 0, 200, 100 );
+				dirLight.castShadow = true;
+				dirLight.shadow.camera.top = 180;
+				dirLight.shadow.camera.bottom = - 100;
+				dirLight.shadow.camera.left = - 120;
+				dirLight.shadow.camera.right = 120;
+				scene.add( dirLight );
+
+				var cover = new THREE.MeshNormalMaterial();
+				var sphereShape = new THREE.SphereGeometry(100, 20, 15);
+			
+				var sphereMesh = new THREE.Mesh(sphereShape, cover);
+				sphereMesh.position.set( 0, - 0.2, - 10 )
+				scene.add(sphereMesh);
+
+				var clock = new THREE.Clock();
+
+				var buildUp = function () {
+					return new TWEEN.Tween({
+						scale: 1
+					}).to ({
+						scale : 3
+					}, 2000).onUpdate(function () {
+								sphereMesh.scale.x = this.scale;
+							}).onComplete(function () {
+								buildDown().start();
+							});
+				};
+				var buildDown = function () {
+					return new TWEEN.Tween({
+						scale: 3
+					}).to ({
+						scale : 1
+					}, 2000).onUpdate(function () {
+								sphereMesh.scale.x = this.scale;
+							}).onComplete(function () {
+								buildUp().start();
+							});
+				};
+
+				buildUp().start();
+
+				const loader2 = new FontLoader();
+				loader2.load( 'fonts/helvetiker_regular.typeface.json', function ( font ) {
+
+					const color = 0xffffff;
+
+					const matDark = new THREE.LineBasicMaterial( {
+						color: color,
+						side: THREE.DoubleSide
+					} );
+
+					const matLite = new THREE.MeshBasicMaterial( {
+						color: color,
+						transparent: true,
+						opacity: 1,
+						side: THREE.DoubleSide
+					} );
+
+					const message = 'Three.js\nSimple text.';
+
+					const shapes = font.generateShapes( message, 0.1 );
+
+					const geometry = new THREE.ShapeGeometry( shapes );
+
+					geometry.computeBoundingBox();
+
+					const xMid = - 0.5 * ( geometry.boundingBox.max.x - geometry.boundingBox.min.x );
+
+					geometry.translate( xMid, 0, 0 );
+
+					// make shape ( N.B. edge view not visible )
+
+					const text = new THREE.Mesh( geometry, matLite );
+					text.position.z = -6;
+					scene.add( text );
+
+					// make line shape ( N.B. edge view remains visible )
+
+					const holeShapes = [];
+
+					for ( let i = 0; i < shapes.length; i ++ ) {
+
+						const shape = shapes[ i ];
+
+						if ( shape.holes && shape.holes.length > 0 ) {
+
+							for ( let j = 0; j < shape.holes.length; j ++ ) {
+
+								const hole = shape.holes[ j ];
+								holeShapes.push( hole );
+
+							}
+
+						}
+
+					}
+
+					shapes.push.apply( shapes, holeShapes );
+
+					const lineText = new THREE.Object3D();
+
+					for ( let i = 0; i < shapes.length; i ++ ) {
+
+						const shape = shapes[ i ];
+
+						const points = shape.getPoints();
+						const geometry = new THREE.BufferGeometry().setFromPoints( points );
+
+						geometry.translate( xMid, 0, 0 );
+
+						const lineMesh = new THREE.Line( geometry, matDark );
+						lineText.add( lineMesh );
+
+					}
+
+					scene.add( lineText );
+
+					render();
+
+				} ); //end load function
+
+				
+				// const fbxLoader3 = new FBXLoader()
+				// 	fbxLoader3.load(
+				// 		'models/fbx/nurbs.fbx',
+				// 		(object) => {
+				// 			// object.traverse(function (child) {
+				// 			//     if ((child as THREE.Mesh).isMesh) {
+				// 			//         // (child as THREE.Mesh).material = material
+				// 			//         if ((child as THREE.Mesh).material) {
+				// 			//             ((child as THREE.Mesh).material as THREE.MeshBasicMaterial).transparent = false
+				// 			//         }
+				// 			//     }
+				// 			// })
+				// 			object.scale.set(.01, .01, .01)
+				// 			scene.add(object)
+				// 		},
+				// 		(xhr) => {
+				// 			console.log((xhr.loaded / xhr.total) * 100 + '% loaded')
+				// 		},
+				// 		(error) => {
+				// 			console.log(error)
+				// 		}
+				// 	)
+
+
+				// const loader = new FBXLoader();
+				
+
+				// loader.load( 'models/fbx/Samba Dancing.fbx', function ( object ) {
+				// 	object.scale.set(.002, .002, .002)
+
+					
+
+				// 	// object.position.x = 0;
+				// 	// object.position.y = 0;
+				// 	// object.position.z = -10;
+
+				// 	mixer = new THREE.AnimationMixer( object );
+					 
+					
+				// 	const action = mixer.clipAction( object.animations[ 0 ] );
+				// 	action.play();
+
+				// 	object.traverse( function ( child ) {
+
+				// 		if ( child.isMesh ) {
+
+				// 			child.castShadow = true;
+				// 			child.receiveShadow = true;
+
+				// 		}
+
+				// 	} );
+					
+				// 	scene.add( object );
+
+				// } );
+
+				
+				new RGBELoader()
+					.setPath( 'textures/equirectangular/' )
+					.load( 'royal_esplanade_1k.hdr', function ( texture ) {
+
+						texture.mapping = THREE.EquirectangularReflectionMapping;
+
+						//scene.background = texture;
+						scene.environment = texture;
+
+						render();
+
+						// model
+
+						const loader = new GLTFLoader().setPath( 'models/gltf/DamagedHelmet/glTF/' );
+						loader.load( 'DamagedHelmet.gltf', function ( gltf ) {
+							GlbObject = gltf.scene;
+							//THREE.Box3.setFromObject(gltf.scene)
+							GlbObject.scale.multiplyScalar(0.5);
+							GlbObject.position.set( 0, - 0.2, - 10 ).applyMatrix4( controller.matrixWorld );
+							//mesh.quaternion.setFromRotationMatrix( controller.matrixWorld );
+							
+							cubes77.push(gltf.scene)
+							
+							scene.add( GlbObject );
+
+							render();
+
+						} );
+
+					} );
+					
+				//document.body.appendChild( renderer.domElement );
+
+				// box
+				function createBox() {
+					let box = new THREE.Mesh(new THREE.BoxBufferGeometry(),
+						new THREE.MeshPhongMaterial({ color: 0xDC143C }));
+					box.position.set(0, 2, -5)
+					box.scale.set(.03, .03, .03);
+					box.castShadow = true;
+					box.receiveShadow = true;
+					scene.add(box)
+
+					var start = { x: 0.5, y: 0.5, z: 0.5 };
+					var target1 = { x: 1, y: 1, z: 1 };
+					var target2 = { x: 0.4, y: 0.4, z: 0.4 };
+					var tween1 = new TWEEN.Tween(start).to(target1, 2000).easing(TWEEN.Easing.Elastic.InOut)
+					var tween2 = new TWEEN.Tween(start).to(target2, 2000).easing(TWEEN.Easing.Elastic.InOut).chain(tween1)
+					tween1.chain(tween2)
+					tween1.start()
+
+					const update = function () {
+						box.scale.x = start.x;
+						box.scale.y = start.y;
+						box.scale.z = start.z;
+					}
+
+					tween1.onUpdate(update)
+					tween2.onUpdate(update);
+				}
+				createBox() 
+				renderer = new THREE.WebGLRenderer( { antialias: true } );
+				renderer.setSize( window.innerWidth, window.innerHeight );
+				document.body.appendChild( renderer.domElement );
+				
+				var targetPosition = new THREE.Vector3( 0, 0, 0 );
+				
+				// create animation
+
+
+				renderer = new THREE.WebGLRenderer( { antialias: true, alpha: true } );
+				renderer.setPixelRatio( window.devicePixelRatio );
+				renderer.setSize( window.innerWidth, window.innerHeight );
+				renderer.xr.enabled = true;
+				container.appendChild( renderer.domElement );
+				const controls = new OrbitControls(camera, renderer.domElement)
+				controls.enableDamping = true
+				controls.target.set(0, 1, 0)
+				//
+
+				document.body.appendChild( ARButton.createButton( renderer, { requiredFeatures: [ 'hit-test' ] } ) );
+
+				//
+
+				const geometry = new THREE.CylinderGeometry( 0.1, 0.1, 0.2, 32 ).translate( 0, 0.1, 0 );
+
+				function onSelect() {
+
+					if ( reticle.visible ) {
+
+						const material = new THREE.MeshPhongMaterial( { color: 0xffffff * Math.random() } );
+						const mesh = new THREE.Mesh( geometry, material );
+						reticle.matrix.decompose( mesh.position, mesh.quaternion, mesh.scale );
+						
+						mesh.scale.y = Math.random() * 2 + 1;
+						scene.add( mesh );
+
+					}
+
+				}
+
+				const geometry33 = new THREE.CylinderGeometry( 0.1, 0.1, 0.2, 32 ).translate( 0, 0.1, 0 );
+				const material33 = new THREE.MeshPhongMaterial( { color: 0xffffff * Math.random() } );
+				const mesh33= new THREE.Mesh( geometry, material33 )
+				scene.add(mesh33)
+
+				controller = renderer.xr.getController( 0 );
+				controller.addEventListener( 'select', onSelect );
+				scene.add( controller );
+
+				reticle = new THREE.Mesh(
+					new THREE.RingGeometry( 0.15, 0.2, 32 ).rotateX( - Math.PI / 2 ),
+					new THREE.MeshBasicMaterial()
+				);
+				reticle.matrixAutoUpdate = false;
+				reticle.visible = false;
+				scene.add( reticle );
+
+				//
+
+
+				const geometry77 = new THREE.BoxGeometry()
+					//const material: THREE.MeshPhongMaterial = new THREE.MeshPhongMaterial({ color: 0xff0000, transparent: true })
+					//const cube: THREE.Mesh = new THREE.Mesh(geometry, material)
+					//scene.add(cube)
+
+					const material77 = [
+						new THREE.MeshPhongMaterial({ color: 0xff0000, transparent: true }),
+						new THREE.MeshPhongMaterial({ color: 0x00ff00, transparent: true }),
+						new THREE.MeshPhongMaterial({ color: 0x0000ff, transparent: true })
+					]
+
+				
+					const cubes77 = [
+						new THREE.Mesh(geometry, material77[0]),
+						new THREE.Mesh(geometry, material77[1]),
+						new THREE.Mesh(geometry, material77[2])
+					]
+					cubes77[0].position.x = -1
+					cubes77[1].position.x = 1
+					cubes77[2].position.x = 2
+
+					cubes77[0].position.z = -7
+					cubes77[1].position.z = -8
+					cubes77[2].position.z = -6
+					cubes77.forEach((c) => scene.add(c))
+
+					const controls2 = new DragControls(cubes77, camera, renderer.domElement)
+					console.log(cubes77)
+					//cubes77[0].scale.multiplyScalar(1);
+					// add event listener to highlight dragged objects
+
+					controls2.addEventListener( 'dragstart', function ( event ) {
+
+						event.object.material.wireframe = true;
+
+					} );
+
+					controls2.addEventListener( 'dragend', function ( event ) {
+
+						event.object.material.wireframe = false;
+
+					} );
+
+				window.addEventListener( 'resize', onWindowResize );
+
+			}
+
+			function onWindowResize() {
+
+				camera.aspect = window.innerWidth / window.innerHeight;
+				camera.updateProjectionMatrix();
+
+				renderer.setSize( window.innerWidth, window.innerHeight );
+
+			}
+
+			//
+
+			function animate() {
+				requestAnimationFrame( animate );
+
+				var t = clock.getElapsedTime();
+				TWEEN.update();
+
+
+				const delta = clock.getDelta();
+
+				if ( mixer ) mixer.update( delta );
+
+				renderer.render( scene, camera );
+
+				stats.update();
+				renderer.setAnimationLoop( render );
+
+			}
+
+			function render( timestamp, frame ) {
+
+				if ( frame ) {
+
+					const referenceSpace = renderer.xr.getReferenceSpace();
+					const session = renderer.xr.getSession();
+
+					if ( hitTestSourceRequested === false ) {
+
+						session.requestReferenceSpace( 'viewer' ).then( function ( referenceSpace ) {
+
+							session.requestHitTestSource( { space: referenceSpace } ).then( function ( source ) {
+
+								hitTestSource = source;
+
+							} );
+
+						} );
+
+						session.addEventListener( 'end', function () {
+
+							hitTestSourceRequested = false;
+							hitTestSource = null;
+
+						} );
+
+						hitTestSourceRequested = true;
+
+					}
+
+					if ( hitTestSource ) {
+
+						const hitTestResults = frame.getHitTestResults( hitTestSource );
+
+						if ( hitTestResults.length ) {
+							const hit = hitTestResults[ 0 ];
+							console.log('hitTestResults.length -> ' + hitTestResults.length + 'hit -> ' + hit)
+
+							reticle.visible = true;
+							reticle.matrix.fromArray( hit.getPose( referenceSpace ).transform.matrix );
+
+						} else {
+
+							reticle.visible = false;
+
+						}
+
+					}
+
+				}
+				
+				stats.update();
+				renderer.render( scene, camera );
+
+			}
+
+		</script>
+	</body>
+</html>
