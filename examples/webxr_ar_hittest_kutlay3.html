@@ -305,6 +305,7 @@
 					var target2 = { x: 0.4, y: 0.4, z: 0.4 };
 					var tween1 = new TWEEN.Tween(start).to(target1, 2000).easing(TWEEN.Easing.Elastic.InOut)
 					var tween2 = new TWEEN.Tween(start).to(target2, 2000).easing(TWEEN.Easing.Elastic.InOut).chain(tween1)
+
 					tween1.chain(tween2)
 					tween1.start()
 
@@ -315,7 +316,7 @@
 					}
 
 					tween1.onUpdate(update)
-					tween2.onUpdate(update);
+
 				}
 				createBox() 
 				renderer = new THREE.WebGLRenderer( { antialias: true } );
@@ -439,7 +440,7 @@
 			function animate() {
 				requestAnimationFrame( animate );
 
-				var t = clock.getElapsedTime();
+				//var t = clock.getElapsedTime();
 				TWEEN.update();
 
 
